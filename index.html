@@ -17,6 +17,9 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- SheetJS untuk membaca file Excel (.xls / .xlsx / .csv) saat impor -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
   <script>
     tailwind.config = {
       theme: {
@@ -26,52 +29,20 @@
           },
           colors: {
             brand: {
-              50: '#eff6ff',
-              100: '#dbeafe',
-              500: '#3b82f6',
-              600: '#2563eb',
-              700: '#1d4ed8',
-              800: '#1e40af',
-              900: '#1e3a8a',
-            },
-            emerald: {
-              50: '#ecfdf5',
-              100: '#d1fae5',
-              500: '#10b981',
-              600: '#059669',
-              700: '#047857',
+              50: '#eef6ff',
+              100: '#d9eaff',
+              500: '#1d63b8',
+              600: '#0b3559',
+              700: '#082742',
             }
           }
         }
       }
-    }
+    };
   </script>
 
   <style>
-    /* Custom scrollbar untuk tabel yang rapi */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-
-    /* Mode Cetak (Print-Friendly) untuk ditempel di depan pintu Ruang Multimedia */
     @media print {
-      body {
-        background: white !important;
-        color: black !important;
-        font-size: 12pt;
-      }
       .no-print {
         display: none !important;
       }
@@ -79,137 +50,90 @@
         display: block !important;
       }
       .print-full-width {
-        width: 100% !important;
-        max-width: 100% !important;
         grid-column: span 12 / span 12 !important;
-        box-shadow: none !important;
-        border: none !important;
-        padding: 0 !important;
-      }
-      table {
         width: 100% !important;
-        border-collapse: collapse !important;
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
       }
-      th, td {
-        border: 1px solid #334155 !important;
-        padding: 8px 10px !important;
-        color: #000 !important;
-      }
-      th {
-        background-color: #f1f5f9 !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+      body {
+        background: #ffffff !important;
       }
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans antialiased">
 
-  <!-- Kop Khusus Saat Dicetak (Print Only) -->
-  <div class="print-only hidden border-b-2 border-slate-800 pb-4 mb-6">
-    <div class="flex items-center justify-center gap-4">
-      <svg class="w-16 h-16 shrink-0" viewBox="0 0 140 155" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M70 18 L118 35 V78 C118 110 96 132 70 144 C44 132 22 110 22 78 V35 Z" fill="#0b3559"/>
-        <path d="M70 25 L111 40 V78 C111 106 92 125 70 136 C48 125 29 106 29 78 V40 Z" stroke="#b59449" stroke-width="3.5" fill="none"/>
-        <path d="M70 14 V58" stroke="#b59449" stroke-width="4.5" stroke-linecap="round"/>
-        <circle cx="70" cy="11" r="5" fill="#ffffff" stroke="#b59449" stroke-width="3.5"/>
-        <rect x="40" y="48" width="60" height="42" rx="6" fill="#0b3559" stroke="#ffffff" stroke-width="4.5"/>
-        <circle cx="70" cy="83" r="2.2" fill="#ffffff"/>
-        <path d="M56 98 H84 L79 90 H61 Z" fill="#0b3559"/>
-        <path d="M52 100 H88" stroke="#0b3559" stroke-width="4" stroke-linecap="round"/>
-        <circle cx="62" cy="69" r="5" fill="#ffffff" stroke="#b59449" stroke-width="3.5"/>
-        <path d="M66 66 L83 51 H95" stroke="#b59449" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M72 72 L106 105" stroke="#0b3559" stroke-width="5" stroke-linecap="round"/>
-        <text x="70" y="116" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="11" fill="#ffffff">SMP</text>
-      </svg>
-      <div class="text-left">
-        <h1 class="text-xl font-bold uppercase tracking-wide">JADWAL PENGGUNAAN RUANG MULTIMEDIA</h1>
-        <h2 class="text-lg font-semibold">SMP PLUS AL-ITTIHAD CIANJUR</h2>
-        <p id="printSubtitle" class="text-sm text-slate-600 mt-0.5">Dicetak pada: -</p>
+  <!-- Kop Cetak Khusus Mode Print -->
+  <div class="hidden print-only border-b-2 border-slate-800 pb-4 mb-6 px-6 pt-4">
+    <div class="flex items-center gap-4">
+      <div class="w-14 h-14 rounded-2xl bg-[#0b3559] flex items-center justify-center shrink-0">
+        <svg viewBox="0 0 120 130" class="w-10 h-10">
+          <path d="M60 12 L104 28 V68 C104 96 84 114 60 124 C36 114 16 96 16 68 V28 Z" fill="#0b3559" stroke="#b59449" stroke-width="5"/>
+          <rect x="34" y="44" width="52" height="36" rx="5" fill="none" stroke="#ffffff" stroke-width="5"/>
+          <path d="M50 88 H70 M60 80 V88" stroke="#b59449" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="60" cy="24" r="5" fill="#b59449"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-xl font-extrabold uppercase tracking-wide text-slate-900">Jadwal Penggunaan Ruang Multimedia</h1>
+        <p class="text-sm font-bold text-slate-700">SMP Plus Al-Ittihad Cianjur — Putra & Putri</p>
+        <p id="printSubtitle" class="text-xs text-slate-500 mt-0.5"></p>
       </div>
     </div>
   </div>
 
-  <!-- Header Modern -->
-  <header class="no-print bg-gradient-to-r from-brand-900 via-brand-800 to-emerald-800 text-white shadow-lg">
+  <!-- Header Utama -->
+  <header class="no-print bg-gradient-to-br from-[#08243e] via-[#0b3559] to-[#134e7a] text-white shadow-lg border-b border-white/10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div class="flex items-start sm:items-center gap-4">
-          <!-- Logo Lab Komputer SMP Plus Al-Ittihad Cianjur -->
-          <div class="p-2 bg-white rounded-2xl border-2 border-amber-300/70 shadow-md shrink-0 flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 relative overflow-hidden">
-            <img 
-              src="logo.png" 
-              alt="Logo Lab Komputer SMP Plus Al Ittihad Cianjur" 
-              class="w-full h-full object-contain"
-              onerror="this.style.display='none'; document.getElementById('fallbackSchoolLogo').classList.remove('hidden');"
-            />
-            <svg id="fallbackSchoolLogo" class="hidden w-full h-full" viewBox="0 0 140 165" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Logo Lab Komputer SMP Plus Al Ittihad Cianjur">
-              <!-- Perisai Utama -->
-              <path d="M70 20 L118 37 V80 C118 112 96 134 70 146 C44 134 22 112 22 80 V37 Z" fill="#0b3559"/>
-              <path d="M70 27 L111 42 V80 C111 108 92 127 70 138 C48 127 29 108 29 80 V42 Z" stroke="#b59449" stroke-width="3.5" fill="none"/>
-              
-              <!-- Roda Gigi Emas Kanan -->
-              <g fill="#b59449">
-                <circle cx="101" cy="70" r="13"/>
-                <rect x="98.5" y="52" width="5" height="36" rx="1"/>
-                <rect x="83" y="67.5" width="36" height="5" rx="1"/>
-                <rect x="88" y="57" width="26" height="5" rx="1" transform="rotate(45 101 70)"/>
-                <rect x="88" y="57" width="26" height="5" rx="1" transform="rotate(-45 101 70)"/>
-                <circle cx="101" cy="70" r="6.5" fill="#0b3559"/>
-              </g>
-
-              <!-- Node Sirkuit Atas -->
-              <path d="M70 14 V60" stroke="#b59449" stroke-width="4.5" stroke-linecap="round"/>
-              <circle cx="70" cy="11" r="5.5" fill="#ffffff" stroke="#b59449" stroke-width="3.5"/>
-              <path d="M53 26 L58 36" stroke="#0b3559" stroke-width="4" stroke-linecap="round"/>
-              <circle cx="51" cy="23" r="4.5" fill="#ffffff" stroke="#0b3559" stroke-width="3"/>
-              <path d="M87 26 L82 36" stroke="#0b3559" stroke-width="4" stroke-linecap="round"/>
-              <circle cx="89" cy="23" r="4.5" fill="#ffffff" stroke="#0b3559" stroke-width="3"/>
-
-              <!-- Monitor Komputer -->
-              <rect x="40" y="50" width="60" height="42" rx="6" fill="#0b3559" stroke="#ffffff" stroke-width="4.5"/>
-              <circle cx="70" cy="85" r="2.2" fill="#ffffff"/>
-              <path d="M56 100 H84 L79 92 H61 Z" fill="#ffffff"/>
-              <path d="M51 102 H89" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
-
-              <!-- Sirkuit Dalam Layar -->
-              <path d="M42 71 H53" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
-              <path d="M73 61 A13 13 0 1 0 77 79" stroke="#ffffff" stroke-width="4" stroke-linecap="round" fill="none"/>
-              <circle cx="74" cy="60" r="3" fill="#ffffff"/>
-              <circle cx="63" cy="71" r="5" fill="#0b3559" stroke="#b59449" stroke-width="3.5"/>
-              <path d="M67 68 L84 53 H96" stroke="#b59449" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M73 74 L108 108" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
-
-              <!-- Teks SMP & Padi Emas Bawah -->
-              <text x="70" y="118" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="11" fill="#ffffff" letter-spacing="0.5">SMP</text>
-              <path d="M47 109 C48 119 56 125 66 127" stroke="#b59449" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-              <path d="M93 109 C92 119 84 125 74 127" stroke="#b59449" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        
+        <!-- Logo & Judul Sekolah -->
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-[#b59449]/50 flex items-center justify-center shadow-inner shrink-0 p-1.5">
+            <img src="logo.png" alt="Logo Lab Komputer SMP Plus Al-Ittihad Cianjur" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+            <svg viewBox="0 0 120 130" class="w-full h-full hidden">
+              <path d="M60 12 L104 28 V68 C104 96 84 114 60 124 C36 114 16 96 16 68 V28 Z" fill="#0b3559" stroke="#b59449" stroke-width="5"/>
+              <rect x="34" y="44" width="52" height="36" rx="5" fill="none" stroke="#ffffff" stroke-width="5"/>
+              <path d="M50 88 H70 M60 80 V88" stroke="#b59449" stroke-width="5" stroke-linecap="round"/>
+              <circle cx="60" cy="24" r="5" fill="#b59449"/>
+              <text x="60" y="106" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold">SMP</text>
             </svg>
           </div>
           <div>
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 mb-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              Lab Komputer & Ruang Multimedia
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#b59449]/25 text-[#f5df9e] border border-[#b59449]/40 mb-1">
+              <span>LAB KOMPUTER & MULTIMEDIA</span>
             </div>
             <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
               Jadwal Penggunaan Ruang Multimedia
             </h1>
-            <p class="text-sm sm:text-base text-blue-100 font-medium flex items-center gap-1.5 mt-0.5">
-              <i data-lucide="school" class="w-4 h-4 text-emerald-300"></i>
-              SMP Plus Al-Ittihad Cianjur
+            <p class="text-xs sm:text-sm text-blue-200 font-medium">
+              SMP Plus Al-Ittihad Cianjur — Kampus Putra & Putri
             </p>
           </div>
         </div>
 
         <!-- Tombol Aksi Header -->
-        <div class="flex flex-wrap items-center gap-2.5">
-          <button onclick="exportToExcel()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-sm font-semibold rounded-xl shadow-sm transition cursor-pointer">
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="exportScheduleToExcel()" class="inline-flex items-center gap-2 px-3.5 py-2.5 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 text-xs sm:text-sm font-bold rounded-xl shadow-sm transition cursor-pointer">
             <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-            <span>Ekspor Excel (.xls)</span>
+            <span>Ekspor Excel</span>
           </button>
-          <button onclick="printSchedule()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 text-white border border-white/25 text-sm font-semibold rounded-xl backdrop-blur-sm transition cursor-pointer">
+          <button onclick="triggerExcelImport()" class="inline-flex items-center gap-2 px-3.5 py-2.5 bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-950 text-xs sm:text-sm font-bold rounded-xl shadow-sm transition cursor-pointer">
+            <i data-lucide="upload" class="w-4 h-4"></i>
+            <span>Impor Excel</span>
+          </button>
+          <button onclick="downloadExcelTemplate()" title="Unduh contoh file Excel siap isi" class="inline-flex items-center gap-2 px-3.5 py-2.5 bg-sky-400 hover:bg-sky-300 active:bg-sky-500 text-slate-950 text-xs sm:text-sm font-bold rounded-xl shadow-sm transition cursor-pointer">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Template Excel</span>
+          </button>
+          <input type="file" id="excelImportInput" accept=".xls,.xlsx,.csv" class="hidden" onchange="handleExcelImport(event)" />
+          <button onclick="shareToWhatsApp()" class="inline-flex items-center gap-2 px-3.5 py-2.5 bg-[#25D366] hover:bg-[#20bd5a] active:bg-[#1da851] text-slate-950 text-xs sm:text-sm font-bold rounded-xl shadow-sm transition cursor-pointer">
+            <i data-lucide="message-circle" class="w-4 h-4"></i>
+            <span>Kirim ke WA</span>
+          </button>
+          <button onclick="printSchedule()" class="inline-flex items-center gap-2 px-3.5 py-2.5 bg-white/15 hover:bg-white/25 text-white border border-white/25 text-xs sm:text-sm font-semibold rounded-xl backdrop-blur-sm transition cursor-pointer">
             <i data-lucide="printer" class="w-4 h-4"></i>
-            <span>Cetak Jadwal</span>
+            <span>Cetak</span>
           </button>
         </div>
       </div>
@@ -583,14 +507,24 @@
 
           <!-- Footer Tabel & Utilitas Data -->
           <div class="no-print px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500">
-            <span id="tableCountInfo">Menampilkan 0 jadwal</span>
-            <div class="flex items-center gap-3">
-              <button onclick="loadSampleData(true)" class="text-brand-600 hover:text-brand-800 font-semibold hover:underline cursor-pointer">
-                Muat Data Contoh
+            <div>
+              <span id="tableCountInfo">Menampilkan 0 jadwal</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5">
+              <button onclick="exportScheduleToExcel()" class="text-emerald-700 hover:text-emerald-900 font-semibold hover:underline cursor-pointer">
+                Ekspor Excel
+              </button>
+              <span>•</span>
+              <button onclick="triggerExcelImport()" class="text-amber-700 hover:text-amber-900 font-semibold hover:underline cursor-pointer">
+                Impor Excel
+              </button>
+              <span>•</span>
+              <button onclick="downloadExcelTemplate()" class="text-sky-700 hover:text-sky-900 font-semibold hover:underline cursor-pointer">
+                Template Excel
               </button>
               <span>•</span>
               <button onclick="openConfirmModal('clearAll')" class="text-rose-600 hover:text-rose-800 font-semibold hover:underline cursor-pointer">
-                Kosongkan Semua Data
+                Kosongkan
               </button>
             </div>
           </div>
@@ -599,6 +533,43 @@
       </section>
     </div>
   </main>
+
+  <!-- Modal Pratinjau & Kirim Jadwal ke WhatsApp -->
+  <div id="waShareModal" class="no-print fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-100">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-[#25D366]/20 text-[#16a34a] flex items-center justify-center shrink-0">
+            <i data-lucide="message-circle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900">Kirim Jadwal ke WhatsApp</h3>
+            <p class="text-xs text-slate-500">Format pesan otomatis sesuai filter jadwal yang sedang tampil</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeWaModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <textarea 
+        id="waMessagePreview" 
+        rows="10" 
+        class="w-full p-3.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#25D366]"
+      ></textarea>
+
+      <div class="flex flex-wrap items-center justify-end gap-2.5 mt-4">
+        <button type="button" onclick="copyWaMessage()" class="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer">
+          <i data-lucide="copy" class="w-4 h-4"></i>
+          <span>Salin Teks</span>
+        </button>
+        <button type="button" onclick="openWhatsAppLink()" class="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-950 bg-[#25D366] hover:bg-[#20bd5a] rounded-xl shadow-sm transition cursor-pointer">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span>Buka WhatsApp</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer class="no-print bg-white border-t border-slate-200 mt-10 py-5">
@@ -633,40 +604,22 @@
   <!-- JAVASCRIPT LOGIC -->
   <script>
     // =========================================================================
-    // 1. KONFIGURASI & STATE APLIKASI
+    // 1. KONSTANTA & STATE UTAMA
     // =========================================================================
-    const STORAGE_KEY = 'smp_alittihad_multimedia_schedules_v2';
+    const STORAGE_KEY = 'smp_al_ittihad_multimedia_schedules_v2';
     const JAM_LIST = [1, 2, 3, 4, 5, 6, 7, 8];
-
-    let schedules = [];
-    let selectedSlots = []; // Menyimpan array angka jam yang sedang dipilih di form, misal [1, 2]
-    let quickFilter = 'all'; // 'today' | 'upcoming' | 'all'
-    let pendingModalAction = null;
-
-    function getSelectedRoomInForm() {
-      const checked = document.querySelector('input[name="roomChoice"]:checked');
-      return checked ? checked.value : 'Multimedia Putra';
-    }
-
-    function setSelectedRoomInForm(roomName) {
-      const target = roomName === 'Multimedia Putri' ? 'Multimedia Putri' : 'Multimedia Putra';
-      const radio = document.querySelector(`input[name="roomChoice"][value="${target}"]`);
-      if (radio) radio.checked = true;
-    }
-
-    function handleRoomChange() {
-      renderFormJamSlots();
-    }
-
-    // Nama hari & bulan dalam Bahasa Indonesia
     const HARI_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const BULAN_ID = [
       'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
       'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
     ];
 
+    let schedules = [];
+    let quickFilter = 'all';
+    let pendingConfirmAction = null;
+
     // =========================================================================
-    // 2. HELPER TANGGAL & FORMATTER
+    // 2. HELPER TANGGAL, FORMATTER & KEAMANAN TEKS
     // =========================================================================
     function getTodayISO() {
       const now = new Date();
@@ -676,371 +629,263 @@
       return `${y}-${m}-${d}`;
     }
 
-    function addDaysISO(baseISO, days) {
-      const [y, m, d] = baseISO.split('-').map(Number);
-      const dateObj = new Date(y, m - 1, d);
-      dateObj.setDate(dateObj.getDate() + days);
-      const ny = dateObj.getFullYear();
-      const nm = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const nd = String(dateObj.getDate()).padStart(2, '0');
-      return `${ny}-${nm}-${nd}`;
-    }
-
     function formatTanggalIndo(isoDate) {
-      if (!isoDate) return '-';
+      if (!isoDate || !/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) return isoDate || '-';
       const [y, m, d] = isoDate.split('-').map(Number);
-      const dateObj = new Date(y, m - 1, d);
-      const hari = HARI_ID[dateObj.getDay()];
-      const bulan = BULAN_ID[m - 1];
-      return `${hari}, ${d} ${bulan} ${y}`;
+      const dt = new Date(y, m - 1, d);
+      return `${HARI_ID[dt.getDay()]}, ${d} ${BULAN_ID[m - 1]} ${y}`;
     }
 
-    function formatJamRange(slots) {
-      if (!slots || slots.length === 0) return '-';
-      const sorted = [...slots].sort((a, b) => a - b);
-      if (sorted.length === 1) {
-        return `Jam ke-${sorted[0]}`;
-      }
-      // Cek apakah berurutan (misal 1, 2, 3 -> Jam ke-1 s/d 3)
-      let isConsecutive = true;
-      for (let i = 1; i < sorted.length; i++) {
-        if (sorted[i] !== sorted[i - 1] + 1) {
-          isConsecutive = false;
-          break;
-        }
-      }
-      if (isConsecutive) {
-        return `Jam ke-${sorted[0]} s/d ${sorted[sorted.length - 1]}`;
-      }
-      return sorted.map(s => `Jam ke-${s}`).join(', ');
+    function formatJamRange(jams) {
+      if (!Array.isArray(jams) || jams.length === 0) return '-';
+      const sorted = [...new Set(jams.map(Number))].sort((a, b) => a - b);
+      if (sorted.length === 1) return `Jam ke-${sorted[0]}`;
+      const isConsecutive = sorted.every((val, idx) => idx === 0 || val === sorted[idx - 1] + 1);
+      if (isConsecutive) return `Jam ke-${sorted[0]} s/d ke-${sorted[sorted.length - 1]}`;
+      return `Jam ke-${sorted.join(', ')}`;
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const toast = document.createElement('div');
+      const colors = type === 'error'
+        ? 'bg-rose-600 text-white border-rose-700'
+        : 'bg-slate-900 text-white border-slate-700';
+      toast.className = `${colors} border px-4 py-3 rounded-xl shadow-lg text-xs sm:text-sm font-medium flex items-center gap-2.5 pointer-events-auto transition-all`;
+      toast.innerHTML = `<span class="w-2 h-2 rounded-full ${type === 'error' ? 'bg-rose-200' : 'bg-emerald-400'} shrink-0"></span><span>${escapeHtml(message)}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 250);
+      }, 3200);
     }
 
     // =========================================================================
-    // 3. PENYIMPANAN & DATA CONTOH
+    // 3. PENYIMPANAN LOCALSTORAGE & DATA CONTOH
     // =========================================================================
-    function loadFromStorage() {
+    function saveSchedules() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(schedules));
+      } catch (e) {}
+    }
+
+    function loadSchedules() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
-          schedules = JSON.parse(raw).map(item => ({
-            ...item,
-            room: item.room || 'Multimedia Putra'
-          }));
-        } else {
-          // Muat data contoh otomatis saat pertama kali aplikasi dibuka
-          loadSampleData(false);
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            schedules = parsed;
+            return;
+          }
         }
-      } catch (e) {
-        console.error('Gagal membaca localStorage:', e);
-        schedules = [];
-      }
-    }
-
-    function saveToStorage() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(schedules));
-      } catch (e) {
-        console.error('Gagal menyimpan ke localStorage:', e);
-        showToast('Gagal menyimpan data ke penyimpanan browser.', 'error');
-      }
+      } catch (e) {}
+      loadSampleData(false);
     }
 
     function loadSampleData(notify = true) {
       const today = getTodayISO();
-      const tomorrow = addDaysISO(today, 1);
-
       schedules = [
         {
           id: 'sample-1',
-          room: 'Multimedia Putra',
           date: today,
-          slots: [1, 2],
+          room: 'Multimedia Putra',
+          jams: [1, 2],
           teacher: 'Ust. Ahmad Fauzi, S.Pd.',
           subject: 'Ilmu Pengetahuan Alam (IPA)',
-          notes: 'Kelas 8A - Simulasi Sistem Tata Surya',
-          status: 'Selesai',
-          createdAt: Date.now() - 3600000
+          notes: 'Kelas 8A - Praktikum Simulasi Tata Surya',
+          status: 'Terjadwal'
         },
         {
           id: 'sample-2',
-          room: 'Multimedia Putri',
           date: today,
-          slots: [1, 2, 3],
-          teacher: 'Ibu Siti Nurhaliza, M.Pd.',
+          room: 'Multimedia Putri',
+          jams: [3, 4],
+          teacher: 'Ustdz. Siti Nurhaliza, S.Pd.',
           subject: 'Bahasa Inggris',
-          notes: 'Kelas 9D - Listening & Speaking Practice',
-          status: 'Terjadwal',
-          createdAt: Date.now() - 1800000
-        },
-        {
-          id: 'sample-3',
-          room: 'Multimedia Putra',
-          date: today,
-          slots: [5, 6],
-          teacher: 'Bpk. Dedi Kurniawan, S.Kom.',
-          subject: 'Informatika / TIK',
-          notes: 'Kelas 7B - Pengenalan Perangkat Keras',
-          status: 'Terjadwal',
-          createdAt: Date.now() - 900000
-        },
-        {
-          id: 'sample-4',
-          room: 'Multimedia Putri',
-          date: tomorrow,
-          slots: [2, 3],
-          teacher: 'Ibu Rina Marlina, S.Pd.',
-          subject: 'Pendidikan Agama Islam (PAI)',
-          notes: 'Kelas 7E - Tayangan Sejarah Peradaban Islam',
-          status: 'Terjadwal',
-          createdAt: Date.now()
+          notes: 'Kelas 9B - Listening Comprehension',
+          status: 'Terjadwal'
         }
       ];
-      saveToStorage();
-      refreshAllUI();
-      if (notify) {
-        showToast('Data contoh Putra & Putri berhasil dimuat!', 'success');
-      }
+      saveSchedules();
+      renderAll();
+      if (notify) showToast('Data contoh berhasil dimuat.', 'success');
     }
 
     // =========================================================================
-    // 4. LOGIKA DETEKSI BENTROK (PER TANGGAL & RUANG) & RENDER SLOT JAM
+    // 4. PILIHAN RUANGAN & RENDER SLOT JAM PELAJARAN (1 - 8)
     // =========================================================================
-    function getBookedSlotsForDateAndRoom(dateISO, roomName, excludeBookingId = null) {
-      // Mengembalikan map: { 1: bookingObj, 2: bookingObj, ... } khusus untuk tanggal & ruang tertentu
-      const bookedMap = {};
+    function getSelectedRoom() {
+      const checked = document.querySelector('input[name="roomChoice"]:checked');
+      return checked ? checked.value : 'Multimedia Putra';
+    }
+
+    function handleRoomChange() {
+      renderFormJamSlots([]);
+    }
+
+    function getOccupiedJamMap(dateStr, roomName, excludeId = '') {
+      const map = {};
       schedules.forEach(item => {
-        const itemRoom = item.room || 'Multimedia Putra';
-        if (item.date === dateISO && itemRoom === roomName && item.id !== excludeBookingId) {
-          item.slots.forEach(slotNum => {
-            bookedMap[slotNum] = item;
+        if (item.date === dateStr && item.room === roomName && item.id !== excludeId) {
+          (item.jams || []).forEach(j => {
+            map[Number(j)] = item;
           });
         }
       });
-      return bookedMap;
+      return map;
     }
 
-    function renderFormJamSlots() {
-      const container = document.getElementById('jamSlotContainer');
-      const selectedDate = document.getElementById('bookingDate').value;
-      const selectedRoom = getSelectedRoomInForm();
-      const editId = document.getElementById('editId').value || null;
-      const bookedMap = getBookedSlotsForDateAndRoom(selectedDate, selectedRoom, editId);
+    function renderFormJamSlots(preselectedJams = []) {
+      const dateStr = document.getElementById('bookingDate').value || getTodayISO();
+      const roomName = getSelectedRoom();
+      const editId = document.getElementById('editId').value;
+      const occupiedMap = getOccupiedJamMap(dateStr, roomName, editId);
 
-      // Update label hari & ruang di bawah input tanggal
-      document.getElementById('selectedDateReadable').innerHTML = `
-        <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-        <span>${formatTanggalIndo(selectedDate)} • <strong>${selectedRoom}</strong></span>
-      `;
-
-      // Bersihkan selectedSlots jika ternyata sudah bentrok saat tanggal/ruang diganti
-      selectedSlots = selectedSlots.filter(s => !bookedMap[s]);
-
-      container.innerHTML = '';
-      JAM_LIST.forEach(jam => {
-        const isBooked = Boolean(bookedMap[jam]);
-        const isSelected = selectedSlots.includes(jam);
-
-        const btn = document.createElement('button');
-        btn.type = 'button';
-
-        if (isBooked) {
-          // Slot sudah terpakai guru lain
-          btn.disabled = true;
-          btn.title = `Sudah dibooking oleh ${bookedMap[jam].teacher} (${bookedMap[jam].subject})`;
-          btn.className = 'flex flex-col items-start p-2.5 rounded-xl border border-rose-200 bg-rose-50/80 text-rose-700 opacity-85 cursor-not-allowed text-left';
-          btn.innerHTML = `
-            <div class="flex items-center justify-between w-full">
-              <span class="text-xs font-bold">Jam ke-${jam}</span>
-              <span class="text-[10px] font-semibold px-1.5 py-0.2 bg-rose-200/70 text-rose-800 rounded">Terisi</span>
-            </div>
-            <span class="text-[10px] truncate w-full mt-1 text-rose-600">${bookedMap[jam].teacher}</span>
-          `;
-        } else if (isSelected) {
-          // Slot sedang dipilih user
-          btn.className = 'flex flex-col items-start p-2.5 rounded-xl border-2 border-brand-600 bg-brand-600 text-white shadow-sm transition cursor-pointer text-left';
-          btn.onclick = () => toggleSlotSelection(jam);
-          btn.innerHTML = `
-            <div class="flex items-center justify-between w-full">
-              <span class="text-xs font-bold">Jam ke-${jam}</span>
-              <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-300"></i>
-            </div>
-            <span class="text-[10px] text-blue-100 mt-1">Dipilih</span>
-          `;
-        } else {
-          // Slot tersedia
-          btn.className = 'flex flex-col items-start p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-100/70 hover:border-emerald-400 text-slate-800 transition cursor-pointer text-left';
-          btn.onclick = () => toggleSlotSelection(jam);
-          btn.innerHTML = `
-            <div class="flex items-center justify-between w-full">
-              <span class="text-xs font-bold text-slate-800">Jam ke-${jam}</span>
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            </div>
-            <span class="text-[10px] text-emerald-700 font-medium mt-1">Tersedia</span>
-          `;
-        }
-
-        container.appendChild(btn);
-      });
-
-      lucide.createIcons();
-    }
-
-    function toggleSlotSelection(jam) {
-      if (selectedSlots.includes(jam)) {
-        selectedSlots = selectedSlots.filter(s => s !== jam);
-      } else {
-        selectedSlots.push(jam);
-        selectedSlots.sort((a, b) => a - b);
+      const readableEl = document.getElementById('selectedDateReadable');
+      if (readableEl) {
+        readableEl.querySelector('span').textContent = `${formatTanggalIndo(dateStr)} • ${roomName}`;
       }
-      renderFormJamSlots();
-    }
 
-    // =========================================================================
-    // 5. VISUALISASI 8 SLOT HARIAN (PUTRA & PUTRI) & STATISTIK HEADER
-    // =========================================================================
-    function renderSingleRoomSlotGrid(gridElementId, bookedMap, accentColor) {
-      const grid = document.getElementById(gridElementId);
-      grid.innerHTML = '';
+      const container = document.getElementById('jamSlotContainer');
+      if (!container) return;
+      container.innerHTML = '';
 
       JAM_LIST.forEach(jam => {
-        const booking = bookedMap[jam];
-        const card = document.createElement('div');
-        if (booking) {
-          const badgeClass = accentColor === 'blue'
-            ? 'bg-blue-200/80 text-blue-900'
-            : 'bg-rose-200/80 text-rose-900';
-          const borderClass = accentColor === 'blue'
-            ? 'border-blue-200 bg-white'
-            : 'border-rose-200 bg-white';
+        const blocker = occupiedMap[jam];
+        const isChecked = preselectedJams.includes(jam) && !blocker;
+        const label = document.createElement('label');
 
-          card.className = `p-2.5 rounded-xl border ${borderClass} shadow-2xs flex flex-col justify-between`;
-          card.innerHTML = `
-            <div class="flex items-center justify-between gap-1">
-              <span class="text-xs font-extrabold text-slate-800">Jam ke-${jam}</span>
-              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md ${badgeClass}">Terpakai</span>
+        if (blocker) {
+          label.className = 'p-2.5 rounded-xl border border-rose-200 bg-rose-50/90 text-rose-700 cursor-not-allowed opacity-90 flex flex-col justify-between';
+          label.title = `Sudah dibooking oleh ${blocker.teacher} (${blocker.subject})`;
+          label.innerHTML = `
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold">Jam ke-${jam}</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-200/70 text-rose-800">Terisi</span>
             </div>
-            <div class="mt-1.5">
-              <p class="text-[11px] font-bold text-slate-800 truncate" title="${booking.teacher}">${booking.teacher}</p>
-              <p class="text-[10px] text-slate-500 truncate" title="${booking.subject}">${booking.subject}</p>
-            </div>
+            <div class="text-[10px] truncate mt-1 font-medium text-rose-600">${escapeHtml(blocker.teacher)}</div>
           `;
         } else {
-          card.className = 'p-2.5 rounded-xl border border-slate-200/80 bg-white/70 flex flex-col justify-between';
-          card.innerHTML = `
-            <div class="flex items-center justify-between gap-1">
-              <span class="text-xs font-bold text-slate-600">Jam ke-${jam}</span>
-              <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-700">Kosong</span>
+          label.className = 'cursor-pointer select-none';
+          label.innerHTML = `
+            <input type="checkbox" name="jamSlot" value="${jam}" class="peer sr-only" ${isChecked ? 'checked' : ''}>
+            <div class="p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/60 text-slate-700 peer-checked:border-brand-600 peer-checked:bg-brand-600 peer-checked:text-white transition flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-extrabold">Jam ke-${jam}</span>
+                <span class="text-[10px] font-semibold opacity-80">Kosong</span>
+              </div>
+              <div class="text-[10px] mt-1 opacity-75">Klik pilih</div>
             </div>
-            <p class="text-[10px] text-slate-400 mt-1.5">Tersedia</p>
           `;
         }
-        grid.appendChild(card);
+        container.appendChild(label);
       });
     }
 
     function renderDailySlotOverview() {
-      // Gunakan tanggal dari filterDateInput jika diisi, jika tidak gunakan tanggal di form bookingDate
-      const filterDate = document.getElementById('filterDateInput').value;
-      const formDate = document.getElementById('bookingDate').value;
-      const targetDate = filterDate || formDate || getTodayISO();
+      const dateStr = document.getElementById('bookingDate').value || getTodayISO();
+      const labelEl = document.getElementById('slotOverviewDateLabel');
+      if (labelEl) {
+        labelEl.textContent = `Jadwal slot pada ${formatTanggalIndo(dateStr)}`;
+      }
 
-      const bookedPutra = getBookedSlotsForDateAndRoom(targetDate, 'Multimedia Putra');
-      const bookedPutri = getBookedSlotsForDateAndRoom(targetDate, 'Multimedia Putri');
+      ['Multimedia Putra', 'Multimedia Putri'].forEach(roomName => {
+        const isPutra = roomName === 'Multimedia Putra';
+        const gridEl = document.getElementById(isPutra ? 'dailySlotPutraGrid' : 'dailySlotPutriGrid');
+        const badgeEl = document.getElementById(isPutra ? 'slotPutraBadge' : 'slotPutriBadge');
+        if (!gridEl) return;
 
-      const freePutra = 8 - Object.keys(bookedPutra).length;
-      const freePutri = 8 - Object.keys(bookedPutri).length;
-
-      document.getElementById('slotOverviewDateLabel').textContent = `Status penggunaan pada ${formatTanggalIndo(targetDate)}`;
-
-      const badgePutra = document.getElementById('slotPutraBadge');
-      badgePutra.textContent = freePutra === 0 ? 'Putra: Penuh' : `Putra: ${freePutra} Kosong`;
-      badgePutra.className = freePutra === 0
-        ? 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200'
-        : 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200';
-
-      const badgePutri = document.getElementById('slotPutriBadge');
-      badgePutri.textContent = freePutri === 0 ? 'Putri: Penuh' : `Putri: ${freePutri} Kosong`;
-      badgePutri.className = freePutri === 0
-        ? 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200'
-        : 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200';
-
-      renderSingleRoomSlotGrid('dailySlotPutraGrid', bookedPutra, 'blue');
-      renderSingleRoomSlotGrid('dailySlotPutriGrid', bookedPutri, 'rose');
-    }
-
-    function updateStatistics() {
-      const today = getTodayISO();
-
-      const todaySchedules = schedules.filter(s => s.date === today);
-      let putraUsedSlots = 0;
-      let putriUsedSlots = 0;
-
-      todaySchedules.forEach(s => {
-        const room = s.room || 'Multimedia Putra';
-        if (room === 'Multimedia Putri') {
-          putriUsedSlots += s.slots.length;
-        } else {
-          putraUsedSlots += s.slots.length;
+        const occupied = getOccupiedJamMap(dateStr, roomName);
+        const freeCount = JAM_LIST.filter(j => !occupied[j]).length;
+        if (badgeEl) {
+          badgeEl.textContent = `${isPutra ? 'Putra' : 'Putri'}: ${freeCount} Kosong`;
         }
+
+        gridEl.innerHTML = '';
+        JAM_LIST.forEach(jam => {
+          const item = occupied[jam];
+          const card = document.createElement('div');
+          if (item) {
+            card.className = 'p-2 rounded-lg bg-white border border-rose-200 shadow-2xs';
+            card.innerHTML = `
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-extrabold text-rose-700">Jam ke-${jam}</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+              </div>
+              <p class="text-[10px] font-semibold text-slate-800 truncate mt-0.5">${escapeHtml(item.teacher)}</p>
+              <p class="text-[9px] text-slate-500 truncate">${escapeHtml(item.subject)}</p>
+            `;
+          } else {
+            card.className = 'p-2 rounded-lg bg-white/80 border border-emerald-200/80';
+            card.innerHTML = `
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-emerald-700">Jam ke-${jam}</span>
+                <span class="text-[9px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Kosong</span>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Tersedia</p>
+            `;
+          }
+          gridEl.appendChild(card);
+        });
       });
-
-      document.getElementById('statTodayBookings').innerHTML = `${todaySchedules.length} <span class="text-sm font-normal text-blue-200">Booking</span>`;
-      document.getElementById('statPutraToday').innerHTML = `${putraUsedSlots} / 8 <span class="text-sm font-normal text-sky-200">Jam Mapel</span>`;
-      document.getElementById('statPutriToday').innerHTML = `${putriUsedSlots} / 8 <span class="text-sm font-normal text-rose-200">Jam Mapel</span>`;
-    }
-
-    function updateTeacherAutocomplete() {
-      const datalist = document.getElementById('teacherSuggestions');
-      const uniqueTeachers = [...new Set(schedules.map(s => s.teacher.trim()).filter(Boolean))];
-      datalist.innerHTML = uniqueTeachers.map(t => `<option value="${t}"></option>`).join('');
     }
 
     // =========================================================================
-    // 6. SUBMIT FORM (TAMBAH & EDIT BOOKING)
+    // 5. TAMBAH, EDIT, STATUS & HAPUS JADWAL
     // =========================================================================
-    document.getElementById('bookingForm').addEventListener('submit', function (e) {
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
       e.preventDefault();
 
-      const editId = document.getElementById('editId').value || null;
-      const room = getSelectedRoomInForm();
+      const editId = document.getElementById('editId').value;
+      const room = getSelectedRoom();
       const date = document.getElementById('bookingDate').value;
       const teacher = document.getElementById('teacherName').value.trim();
       const subject = document.getElementById('subjectName').value.trim();
       const notes = document.getElementById('classNotes').value.trim();
+      const selectedJams = Array.from(document.querySelectorAll('input[name="jamSlot"]:checked'))
+        .map(el => Number(el.value))
+        .sort((a, b) => a - b);
 
       if (!date) {
-        showToast('Silakan pilih tanggal penggunaan terlebih dahulu.', 'error');
+        showToast('Tanggal penggunaan wajib dipilih.', 'error');
         return;
       }
-
-      if (selectedSlots.length === 0) {
-        showToast('Pilih minimal 1 Jam Mapel (Jam ke-1 s/d Jam ke-8).', 'error');
+      if (selectedJams.length === 0) {
+        showToast('Pilih minimal 1 jam pelajaran (Jam ke-1 s/d ke-8).', 'error');
         return;
       }
-
       if (!teacher || !subject) {
-        showToast('Nama Guru dan Mata Pelajaran wajib diisi.', 'error');
+        showToast('Nama guru dan mata pelajaran wajib diisi.', 'error');
         return;
       }
 
-      // Validasi ulang bentrok khusus untuk tanggal & ruang yang dipilih
-      const bookedMap = getBookedSlotsForDateAndRoom(date, room, editId);
-      const conflicts = selectedSlots.filter(s => bookedMap[s]);
-      if (conflicts.length > 0) {
-        showToast(`Bentrok di ${room} pada Jam ke-${conflicts.join(', ')}! Silakan pilih jam lain.`, 'error');
-        renderFormJamSlots();
+      const occupied = getOccupiedJamMap(date, room, editId);
+      const conflictJams = selectedJams.filter(j => occupied[j]);
+      if (conflictJams.length > 0) {
+        showToast(`Bentrok pada Jam ke-${conflictJams.join(', ')} di ${room}.`, 'error');
+        renderFormJamSlots(selectedJams);
         return;
       }
 
       if (editId) {
-        // Mode Update
-        const index = schedules.findIndex(item => item.id === editId);
-        if (index !== -1) {
-          schedules[index] = {
-            ...schedules[index],
-            room,
+        const idx = schedules.findIndex(s => s.id === editId);
+        if (idx !== -1) {
+          schedules[idx] = {
+            ...schedules[idx],
             date,
-            slots: [...selectedSlots].sort((a, b) => a - b),
+            room,
+            jams: selectedJams,
             teacher,
             subject,
             notes
@@ -1048,25 +893,22 @@
           showToast('Perubahan jadwal berhasil disimpan!', 'success');
         }
       } else {
-        // Mode Tambah Baru
-        const newBooking = {
-          id: 'bk-' + Date.now(),
-          room,
+        schedules.push({
+          id: 'bk-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
           date,
-          slots: [...selectedSlots].sort((a, b) => a - b),
+          room,
+          jams: selectedJams,
           teacher,
           subject,
           notes,
-          status: 'Terjadwal',
-          createdAt: Date.now()
-        };
-        schedules.push(newBooking);
-        showToast(`${room}: Jadwal ${teacher} (${formatJamRange(newBooking.slots)}) berhasil dibooking!`, 'success');
+          status: 'Terjadwal'
+        });
+        showToast(`Booking ${room} (${formatJamRange(selectedJams)}) berhasil disimpan!`, 'success');
       }
 
-      saveToStorage();
-      resetForm(date, room); // Pertahankan tanggal & ruang yang barusan dipilih
-      refreshAllUI();
+      saveSchedules();
+      resetForm(false);
+      renderAll();
     });
 
     function editSchedule(id) {
@@ -1074,276 +916,233 @@
       if (!item) return;
 
       document.getElementById('editId').value = item.id;
-      setSelectedRoomInForm(item.room || 'Multimedia Putra');
+      const roomRadio = document.querySelector(`input[name="roomChoice"][value="${item.room}"]`);
+      if (roomRadio) roomRadio.checked = true;
+
       document.getElementById('bookingDate').value = item.date;
       document.getElementById('teacherName').value = item.teacher;
       document.getElementById('subjectName').value = item.subject;
       document.getElementById('classNotes').value = item.notes || '';
-      selectedSlots = [...item.slots];
 
-      // Ubah tampilan header form menjadi Mode Edit
       document.getElementById('formTitle').textContent = 'Edit Jadwal Booking';
       document.getElementById('submitBtnText').textContent = 'Simpan Perubahan';
       document.getElementById('cancelEditBtn').classList.remove('hidden');
 
-      renderFormJamSlots();
+      renderFormJamSlots(item.jams || []);
       renderDailySlotOverview();
-
-      // Scroll halus ke form di layar mobile
-      document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function resetForm(keepDate = null, keepRoom = null) {
+    function resetForm(rerender = true) {
+      const currentDate = document.getElementById('bookingDate').value || getTodayISO();
+      document.getElementById('bookingForm').reset();
       document.getElementById('editId').value = '';
-      if (keepRoom) {
-        setSelectedRoomInForm(keepRoom);
-      }
-      document.getElementById('bookingDate').value = keepDate || getTodayISO();
-      document.getElementById('teacherName').value = '';
-      document.getElementById('subjectName').value = '';
-      document.getElementById('classNotes').value = '';
-      selectedSlots = [];
-
+      document.getElementById('bookingDate').value = currentDate;
       document.getElementById('formTitle').textContent = 'Booking Ruang Multimedia';
       document.getElementById('submitBtnText').textContent = 'Simpan Jadwal Booking';
       document.getElementById('cancelEditBtn').classList.add('hidden');
+      if (rerender) {
+        renderFormJamSlots([]);
+        renderDailySlotOverview();
+      }
+    }
 
-      renderFormJamSlots();
-      renderDailySlotOverview();
+    function toggleStatus(id) {
+      const item = schedules.find(s => s.id === id);
+      if (!item) return;
+      item.status = item.status === 'Selesai' ? 'Terjadwal' : 'Selesai';
+      saveSchedules();
+      renderAll();
+      showToast(`Status diubah menjadi ${item.status}.`, 'success');
     }
 
     // =========================================================================
-    // 7. FILTER, PENCARIAN & RENDER TABEL JADWAL
+    // 6. FILTER, PENCARIAN, RENDER TABEL & STATISTIK
     // =========================================================================
     function setQuickFilter(type) {
       quickFilter = type;
-      if (type === 'today') {
-        document.getElementById('filterDateInput').value = getTodayISO();
-      } else {
-        document.getElementById('filterDateInput').value = '';
-      }
-      updateQuickFilterButtons();
-      renderScheduleTable();
-      renderDailySlotOverview();
-    }
-
-    function updateQuickFilterButtons() {
-      const btns = {
-        today: document.getElementById('btnFilterToday'),
-        upcoming: document.getElementById('btnFilterUpcoming'),
-        all: document.getElementById('btnFilterAll')
-      };
-
-      Object.keys(btns).forEach(key => {
-        if (quickFilter === key) {
-          btns[key].className = 'px-3 py-1.5 text-xs font-semibold rounded-lg border border-brand-600 bg-brand-600 text-white shadow-xs transition cursor-pointer';
+      document.getElementById('filterDateInput').value = '';
+      ['today', 'upcoming', 'all'].forEach(key => {
+        const btn = document.getElementById('btnFilter' + key.charAt(0).toUpperCase() + key.slice(1));
+        if (!btn) return;
+        if (key === type) {
+          btn.className = 'px-3 py-1.5 text-xs font-semibold rounded-lg border border-brand-600 bg-brand-600 text-white shadow-xs transition cursor-pointer';
         } else {
-          btns[key].className = 'px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 transition cursor-pointer';
+          btn.className = 'px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 transition cursor-pointer';
         }
       });
+      renderTable();
     }
 
     function clearFilters() {
-      quickFilter = 'all';
       document.getElementById('searchInput').value = '';
       document.getElementById('filterRoomSelect').value = 'all';
       document.getElementById('filterDateInput').value = '';
-      updateQuickFilterButtons();
-      renderScheduleTable();
-      renderDailySlotOverview();
+      setQuickFilter('all');
     }
 
     function getFilteredSchedules() {
-      const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-      const filterRoom = document.getElementById('filterRoomSelect').value;
-      const filterDate = document.getElementById('filterDateInput').value;
+      const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+      const roomFilter = document.getElementById('filterRoomSelect').value;
+      const dateFilter = document.getElementById('filterDateInput').value;
       const today = getTodayISO();
 
       return schedules
         .filter(item => {
-          const itemRoom = item.room || 'Multimedia Putra';
-
-          // Filter ruangan
-          if (filterRoom !== 'all' && itemRoom !== filterRoom) return false;
-
-          // Filter tanggal spesifik
-          if (filterDate && item.date !== filterDate) return false;
-
-          // Filter cepat jika tidak ada tanggal spesifik
-          if (!filterDate) {
+          if (roomFilter !== 'all' && item.room !== roomFilter) return false;
+          if (dateFilter) {
+            if (item.date !== dateFilter) return false;
+          } else {
             if (quickFilter === 'today' && item.date !== today) return false;
             if (quickFilter === 'upcoming' && item.date < today) return false;
           }
-
-          // Filter pencarian teks
-          if (searchQuery) {
-            const matchTeacher = item.teacher.toLowerCase().includes(searchQuery);
-            const matchSubject = item.subject.toLowerCase().includes(searchQuery);
-            const matchNotes = (item.notes || '').toLowerCase().includes(searchQuery);
-            const matchRoom = itemRoom.toLowerCase().includes(searchQuery);
-            const matchDate = formatTanggalIndo(item.date).toLowerCase().includes(searchQuery);
-            if (!matchTeacher && !matchSubject && !matchNotes && !matchRoom && !matchDate) return false;
+          if (q) {
+            const hay = `${item.teacher} ${item.subject} ${item.notes || ''} ${item.room}`.toLowerCase();
+            if (!hay.includes(q)) return false;
           }
-
           return true;
         })
         .sort((a, b) => {
-          // Urutkan berdasarkan tanggal, lalu ruangan (Putra dulu), lalu jam ke-berapa
-          if (a.date !== b.date) {
-            return a.date.localeCompare(b.date);
-          }
-          const roomA = a.room || 'Multimedia Putra';
-          const roomB = b.room || 'Multimedia Putra';
-          if (roomA !== roomB) {
-            return roomA.localeCompare(roomB);
-          }
-          const minA = Math.min(...a.slots);
-          const minB = Math.min(...b.slots);
+          if (a.date !== b.date) return a.date.localeCompare(b.date);
+          const minA = Math.min(...(a.jams || [99]));
+          const minB = Math.min(...(b.jams || [99]));
           return minA - minB;
         });
     }
 
-    function renderScheduleTable() {
+    function renderTable() {
+      const filtered = getFilteredSchedules();
       const tbody = document.getElementById('scheduleTableBody');
       const emptyState = document.getElementById('emptyState');
       const countInfo = document.getElementById('tableCountInfo');
 
-      const filtered = getFilteredSchedules();
       tbody.innerHTML = '';
+      if (countInfo) {
+        countInfo.textContent = `Menampilkan ${filtered.length} dari ${schedules.length} jadwal`;
+      }
 
       if (filtered.length === 0) {
         emptyState.classList.remove('hidden');
-        countInfo.textContent = 'Menampilkan 0 jadwal';
         return;
       }
-
       emptyState.classList.add('hidden');
-      countInfo.textContent = `Menampilkan ${filtered.length} jadwal penggunaan`;
-
-      const today = getTodayISO();
 
       filtered.forEach(item => {
-        const isToday = item.date === today;
+        const isPutra = item.room === 'Multimedia Putra';
         const isDone = item.status === 'Selesai';
-        const roomName = item.room || 'Multimedia Putra';
-        const isPutri = roomName === 'Multimedia Putri';
-
-        const roomBadgeClass = isPutri
-          ? 'bg-rose-50 text-rose-700 border-rose-200'
-          : 'bg-blue-50 text-blue-700 border-blue-200';
-        const roomDotClass = isPutri ? 'bg-rose-500' : 'bg-blue-500';
-
         const tr = document.createElement('tr');
-        tr.className = `hover:bg-blue-50/40 transition ${isDone ? 'bg-slate-50/60' : ''}`;
-
+        tr.className = 'hover:bg-slate-50/90 transition';
         tr.innerHTML = `
-          <td class="py-3.5 px-4 align-top">
-            <div class="font-semibold text-slate-800 text-xs sm:text-sm">${formatTanggalIndo(item.date)}</div>
-            ${isToday ? '<span class="inline-block mt-1 px-2 py-0.5 text-[10px] font-bold bg-brand-100 text-brand-700 rounded-md">Hari Ini</span>' : ''}
+          <td class="py-3.5 px-4 whitespace-nowrap">
+            <div class="font-bold text-slate-800 text-xs sm:text-sm">${escapeHtml(formatTanggalIndo(item.date))}</div>
           </td>
-          <td class="py-3.5 px-4 align-top">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${roomBadgeClass}">
-              <span class="w-1.5 h-1.5 rounded-full ${roomDotClass}"></span>
-              ${roomName}
+          <td class="py-3.5 px-4 whitespace-nowrap">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${isPutra ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
+              ${escapeHtml(item.room)}
             </span>
           </td>
-          <td class="py-3.5 px-4 align-top">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <i data-lucide="clock" class="w-3.5 h-3.5"></i>
-              ${formatJamRange(item.slots)}
+          <td class="py-3.5 px-4 whitespace-nowrap">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-extrabold bg-slate-100 text-slate-800">
+              ${escapeHtml(formatJamRange(item.jams))}
             </span>
-            <div class="text-[11px] text-slate-400 mt-1">(${item.slots.length} Jam Pelajaran)</div>
           </td>
-          <td class="py-3.5 px-4 align-top">
-            <div class="font-bold text-slate-800 text-xs sm:text-sm">${item.teacher}</div>
-            ${item.notes ? `<div class="text-xs text-slate-500 mt-0.5">${item.notes}</div>` : ''}
+          <td class="py-3.5 px-4">
+            <div class="font-semibold text-slate-800 text-xs sm:text-sm">${escapeHtml(item.teacher)}</div>
           </td>
-          <td class="py-3.5 px-4 align-top">
-            <span class="font-medium text-slate-700 text-xs sm:text-sm">${item.subject}</span>
+          <td class="py-3.5 px-4">
+            <div class="font-semibold text-slate-800 text-xs sm:text-sm">${escapeHtml(item.subject)}</div>
+            ${item.notes ? `<div class="text-xs text-slate-500 mt-0.5">${escapeHtml(item.notes)}</div>` : ''}
           </td>
-          <td class="py-3.5 px-4 align-top text-center">
-            <button 
-              onclick="toggleStatus('${item.id}')" 
-              title="Klik untuk mengubah status"
-              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition cursor-pointer ${
-                isDone 
-                  ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' 
-                  : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
-              }"
-            >
-              <span class="w-1.5 h-1.5 rounded-full ${isDone ? 'bg-slate-500' : 'bg-amber-500'}"></span>
-              ${item.status}
+          <td class="py-3.5 px-4 text-center whitespace-nowrap">
+            <button type="button" onclick="toggleStatus('${item.id}')" title="Klik untuk ubah status" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition cursor-pointer ${isDone ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-amber-100 text-amber-800 hover:bg-amber-200'}">
+              <span>${escapeHtml(item.status || 'Terjadwal')}</span>
             </button>
           </td>
-          <td class="no-print py-3.5 px-4 align-top text-right">
-            <div class="inline-flex items-center justify-end gap-1.5">
-              <button 
-                onclick="editSchedule('${item.id}')" 
-                title="Edit Jadwal"
-                class="p-2 text-slate-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition cursor-pointer"
-              >
+          <td class="no-print py-3.5 px-4 text-right whitespace-nowrap">
+            <div class="inline-flex items-center gap-1.5">
+              <button type="button" onclick="editSchedule('${item.id}')" title="Edit Jadwal" class="p-1.5 text-slate-600 hover:text-brand-700 hover:bg-brand-50 rounded-lg transition cursor-pointer">
                 <i data-lucide="pencil" class="w-4 h-4"></i>
               </button>
-              <button 
-                onclick="openConfirmModal('delete', '${item.id}')" 
-                title="Hapus Jadwal"
-                class="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
-              >
+              <button type="button" onclick="openConfirmModal('deleteOne', '${item.id}')" title="Hapus Jadwal" class="p-1.5 text-slate-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition cursor-pointer">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
           </td>
         `;
-
         tbody.appendChild(tr);
       });
 
-      lucide.createIcons();
+      if (window.lucide) {
+        lucide.createIcons();
+      }
     }
 
-    function toggleStatus(id) {
-      const idx = schedules.findIndex(s => s.id === id);
-      if (idx === -1) return;
-      schedules[idx].status = schedules[idx].status === 'Terjadwal' ? 'Selesai' : 'Terjadwal';
-      saveToStorage();
-      renderScheduleTable();
-      showToast(`Status diubah menjadi "${schedules[idx].status}"`, 'info');
+    function updateStatsAndSuggestions() {
+      const today = getTodayISO();
+      const todayItems = schedules.filter(s => s.date === today);
+      const putraJams = new Set();
+      const putriJams = new Set();
+
+      todayItems.forEach(item => {
+        (item.jams || []).forEach(j => {
+          if (item.room === 'Multimedia Putra') putraJams.add(Number(j));
+          if (item.room === 'Multimedia Putri') putriJams.add(Number(j));
+        });
+      });
+
+      document.getElementById('statTodayBookings').innerHTML =
+        `${todayItems.length} <span class="text-sm font-normal text-blue-200">Booking</span>`;
+      document.getElementById('statPutraToday').innerHTML =
+        `${putraJams.size} / 8 <span class="text-sm font-normal text-sky-200">Jam Mapel</span>`;
+      document.getElementById('statPutriToday').innerHTML =
+        `${putriJams.size} / 8 <span class="text-sm font-normal text-rose-200">Jam Mapel</span>`;
+
+      const teacherList = document.getElementById('teacherSuggestions');
+      if (teacherList) {
+        const uniqueTeachers = [...new Set(schedules.map(s => s.teacher).filter(Boolean))];
+        teacherList.innerHTML = uniqueTeachers.map(t => `<option value="${escapeHtml(t)}"></option>`).join('');
+      }
     }
 
     // =========================================================================
-    // 8. MODAL KONFIRMASI HAPUS & KOSONGKAN DATA
+    // 7. MODAL KONFIRMASI HAPUS & KOSONGKAN DATA
     // =========================================================================
-    function openConfirmModal(type, targetId = null) {
+    function openConfirmModal(actionType, targetId = '') {
       const modal = document.getElementById('confirmModal');
       const title = document.getElementById('confirmModalTitle');
       const desc = document.getElementById('confirmModalDesc');
       const actionBtn = document.getElementById('confirmModalActionBtn');
 
-      if (type === 'delete') {
-        const item = schedules.find(s => s.id === targetId);
-        title.textContent = 'Hapus Jadwal Booking?';
-        desc.textContent = item 
-          ? `Jadwal ${item.teacher} (${item.room || 'Multimedia Putra'}) pada ${formatTanggalIndo(item.date)} (${formatJamRange(item.slots)}) akan dihapus permanen.`
-          : 'Jadwal yang dipilih akan dihapus permanen.';
+      if (actionType === 'clearAll') {
+        title.textContent = 'Kosongkan Semua Jadwal?';
+        desc.textContent = 'Seluruh daftar jadwal penggunaan ruang multimedia akan dihapus permanen dari perangkat ini.';
+        actionBtn.textContent = 'Ya, Kosongkan';
+        pendingConfirmAction = () => {
+          schedules = [];
+          saveSchedules();
+          resetForm(false);
+          renderAll();
+          showToast('Semua jadwal berhasil dikosongkan.', 'success');
+        };
+      } else {
+        title.textContent = 'Hapus Jadwal Ini?';
+        desc.textContent = 'Jadwal yang dipilih akan dihapus dan slot jam pelajarannya akan kembali tersedia.';
         actionBtn.textContent = 'Ya, Hapus';
-        pendingModalAction = () => {
+        pendingConfirmAction = () => {
           schedules = schedules.filter(s => s.id !== targetId);
-          saveToStorage();
-          refreshAllUI();
+          saveSchedules();
+          if (document.getElementById('editId').value === targetId) {
+            resetForm(false);
+          }
+          renderAll();
           showToast('Jadwal berhasil dihapus.', 'success');
         };
-      } else if (type === 'clearAll') {
-        title.textContent = 'Kosongkan Semua Data?';
-        desc.textContent = 'Seluruh riwayat jadwal penggunaan ruang multimedia akan dihapus dari perangkat ini.';
-        actionBtn.textContent = 'Ya, Kosongkan';
-        pendingModalAction = () => {
-          schedules = [];
-          saveToStorage();
-          resetForm();
-          refreshAllUI();
-          showToast('Semua data jadwal telah dikosongkan.', 'info');
-        };
       }
+
+      actionBtn.onclick = () => {
+        if (pendingConfirmAction) pendingConfirmAction();
+        closeConfirmModal();
+      };
 
       modal.classList.remove('hidden');
       modal.classList.add('flex');
@@ -1353,190 +1152,482 @@
       const modal = document.getElementById('confirmModal');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
-      pendingModalAction = null;
+      pendingConfirmAction = null;
     }
 
-    document.getElementById('confirmModalActionBtn').addEventListener('click', function () {
-      if (typeof pendingModalAction === 'function') {
-        pendingModalAction();
+    // =========================================================================
+    // 8. SHARE WHATSAPP & CETAK JADWAL
+    // =========================================================================
+    function buildWhatsAppMessage() {
+      const filtered = getFilteredSchedules();
+      const lines = [
+        '*JADWAL PENGGUNAAN RUANG MULTIMEDIA*',
+        '*SMP PLUS AL-ITTIHAD CIANJUR*',
+        '----------------------------------------'
+      ];
+
+      if (filtered.length === 0) {
+        lines.push('_Belum ada jadwal terbooking pada filter ini._');
+      } else {
+        filtered.forEach((item, i) => {
+          const icon = item.status === 'Selesai' ? '✅' : '🕒';
+          lines.push(
+            `${i + 1}. ${icon} *${formatTanggalIndo(item.date)}*`,
+            `   • Ruang: *${item.room}* (${formatJamRange(item.jams)})`,
+            `   • Guru: ${item.teacher}`,
+            `   • Mapel: ${item.subject}${item.notes ? ` (${item.notes})` : ''}`,
+            ''
+          );
+        });
       }
-      closeConfirmModal();
-    });
+
+      return lines.join('\n').trim();
+    }
+
+    function shareToWhatsApp() {
+      document.getElementById('waMessagePreview').value = buildWhatsAppMessage();
+      const modal = document.getElementById('waShareModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeWaModal() {
+      const modal = document.getElementById('waShareModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function copyWaMessage() {
+      const textarea = document.getElementById('waMessagePreview');
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showToast('Teks jadwal berhasil disalin!', 'success');
+      } catch (e) {
+        showToast('Gagal menyalin teks.', 'error');
+      }
+    }
+
+    function openWhatsAppLink() {
+      const text = document.getElementById('waMessagePreview').value;
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function printSchedule() {
+      const now = new Date();
+      document.getElementById('printSubtitle').textContent =
+        `Dicetak pada: ${formatTanggalIndo(getTodayISO())} pukul ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} WIB`;
+      window.print();
+    }
 
     // =========================================================================
-    // 9. EKSPOR EXCEL (.XLS) & MODE CETAK (PRINT)
+    // 8B. EKSPOR JADWAL & IMPOR JADWAL DENGAN EXCEL (.XLS / .XLSX / .CSV)
     // =========================================================================
-    function exportToExcel() {
-      const dataToExport = getFilteredSchedules();
-      if (dataToExport.length === 0) {
-        showToast('Tidak ada data jadwal untuk diekspor.', 'error');
+    function exportScheduleToExcel() {
+      if (schedules.length === 0) {
+        showToast('Belum ada data jadwal untuk diekspor ke Excel.', 'error');
         return;
       }
 
+      const sorted = [...schedules].sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return Math.min(...(a.jams || [99])) - Math.min(...(b.jams || [99]));
+      });
+
       let rowsHtml = '';
-      dataToExport.forEach((item, index) => {
-        const roomName = item.room || 'Multimedia Putra';
+      sorted.forEach((item, idx) => {
+        const isPutra = item.room === 'Multimedia Putra';
+        const isDone = item.status === 'Selesai';
+        const jamListStr = [...new Set((item.jams || []).map(Number))].sort((a, b) => a - b).join(', ');
         rowsHtml += `
-          <tr>
-            <td style="border:1px solid #333; padding:6px; text-align:center;">${index + 1}</td>
-            <td style="border:1px solid #333; padding:6px;">${formatTanggalIndo(item.date)}</td>
-            <td style="border:1px solid #333; padding:6px; font-weight:bold;">${roomName}</td>
-            <td style="border:1px solid #333; padding:6px;">${formatJamRange(item.slots)}</td>
-            <td style="border:1px solid #333; padding:6px;">${item.teacher}</td>
-            <td style="border:1px solid #333; padding:6px;">${item.subject}</td>
-            <td style="border:1px solid #333; padding:6px;">${item.notes || '-'}</td>
-            <td style="border:1px solid #333; padding:6px; text-align:center;">${item.status}</td>
+          <tr style="background:${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+            <td style="border:1px solid #cbd5e1;padding:7px;text-align:center;">${idx + 1}</td>
+            <td style="border:1px solid #cbd5e1;padding:7px;text-align:center;mso-number-format:'\\@';">${escapeHtml(item.date)}</td>
+            <td style="border:1px solid #cbd5e1;padding:7px;">${escapeHtml(formatTanggalIndo(item.date))}</td>
+            <td style="border:1px solid #cbd5e1;padding:7px;font-weight:bold;color:${isPutra ? '#1d4ed8' : '#be123c'};">${escapeHtml(item.room)}</td>
+            <td style="border:1px solid #cbd5e1;padding:7px;text-align:center;mso-number-format:'\\@';">${escapeHtml(jamListStr)}</td>
+            <td style="border:1px solid #cbd5e1;padding:7px;">${escapeHtml(formatJamRange(item.jams))}</td>
+            <td style="border:1px solid #cbd5e1;padding:7px;font-weight:bold;">${escapeHtml(item.teacher)}</td>
+            <td style="border:1px solid #cbd5e1;padding:7px;">${escapeHtml(item.subject)}</td>
+            <td style="border:1px solid #cbd5e1;padding:7px;">${escapeHtml(item.notes || '-')}</td>
+            <td style="border:1px solid #cbd5e1;padding:7px;text-align:center;font-weight:bold;color:${isDone ? '#15803d' : '#b45309'};">${escapeHtml(item.status || 'Terjadwal')}</td>
           </tr>
         `;
       });
 
-      const excelTemplate = `
+      const excelHtml = `
         <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-        <head>
-          <meta charset="UTF-8">
-        </head>
+        <head><meta charset="UTF-8"></head>
         <body>
-          <table>
+          <table style="border-collapse:collapse;font-family:Calibri,Arial,sans-serif;">
+            <tr><td colspan="10" style="font-size:14pt;font-weight:bold;color:#0b3559;padding:6px 0;">JADWAL PENGGUNAAN RUANG MULTIMEDIA - SMP PLUS AL-ITTIHAD CIANJUR</td></tr>
+            <tr><td colspan="10" style="font-size:10pt;color:#475569;padding-bottom:10px;">Diekspor pada: ${escapeHtml(formatTanggalIndo(getTodayISO()))}</td></tr>
             <tr>
-              <td colspan="8" style="font-size:16px; font-weight:bold; text-align:center;">JADWAL PENGGUNAAN RUANG MULTIMEDIA</td>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">No</th>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Tanggal (ISO)</th>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Hari & Tanggal</th>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Ruang Multimedia</th>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Kode Jam</th>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Jam Mapel</th>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Nama Guru</th>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Mata Pelajaran</th>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Kelas & Keperluan</th>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Status</th>
             </tr>
-            <tr>
-              <td colspan="8" style="font-size:14px; font-weight:bold; text-align:center;">SMP PLUS AL-ITTIHAD CIANJUR</td>
-            </tr>
-            <tr>
-              <td colspan="8" style="font-size:11px; text-align:center;">Diekspor pada: ${formatTanggalIndo(getTodayISO())}</td>
-            </tr>
-            <tr><td colspan="8"></td></tr>
-            <thead>
-              <tr style="background-color:#dbeafe; font-weight:bold;">
-                <th style="border:1px solid #333; padding:8px; width:40px;">No</th>
-                <th style="border:1px solid #333; padding:8px; width:170px;">Hari & Tanggal</th>
-                <th style="border:1px solid #333; padding:8px; width:145px;">Ruang Multimedia</th>
-                <th style="border:1px solid #333; padding:8px; width:135px;">Jam Mapel</th>
-                <th style="border:1px solid #333; padding:8px; width:200px;">Nama Guru</th>
-                <th style="border:1px solid #333; padding:8px; width:180px;">Mata Pelajaran</th>
-                <th style="border:1px solid #333; padding:8px; width:220px;">Kelas / Keperluan</th>
-                <th style="border:1px solid #333; padding:8px; width:95px;">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rowsHtml}
-            </tbody>
+            ${rowsHtml}
           </table>
         </body>
         </html>
       `;
 
-      const blob = new Blob(['\ufeff', excelTemplate], {
-        type: 'application/vnd.ms-excel;charset=utf-8;'
-      });
-
+      const blob = new Blob(['\ufeff' + excelHtml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Jadwal_Ruang_Multimedia_Putra_Putri_SMP_Al_Ittihad_${getTodayISO()}.xls`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      showToast('File Excel (.xls) berhasil diunduh!', 'success');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Jadwal_Ruang_Multimedia_SMP_Al_Ittihad_${getTodayISO()}.xls`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast(`Berhasil mengekspor ${schedules.length} jadwal ke Excel!`, 'success');
     }
 
-    function printSchedule() {
-      const filterDate = document.getElementById('filterDateInput').value;
-      const filterRoom = document.getElementById('filterRoomSelect').value;
-      const subtitle = document.getElementById('printSubtitle');
-      const roomLabel = filterRoom === 'all' ? 'Multimedia Putra & Putri' : filterRoom;
-
-      if (filterDate) {
-        subtitle.textContent = `${roomLabel} • Periode: ${formatTanggalIndo(filterDate)}`;
-      } else if (quickFilter === 'today') {
-        subtitle.textContent = `${roomLabel} • Periode: Hari Ini (${formatTanggalIndo(getTodayISO())})`;
-      } else {
-        subtitle.textContent = `${roomLabel} • Dicetak pada: ${formatTanggalIndo(getTodayISO())}`;
+    function triggerExcelImport() {
+      const input = document.getElementById('excelImportInput');
+      if (input) {
+        input.value = '';
+        input.click();
       }
-      window.print();
     }
 
-    // =========================================================================
-    // 10. TOAST NOTIFICATION & EVENT LISTENERS
-    // =========================================================================
-    function showToast(message, type = 'success') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-
-      const styles = {
-        success: 'bg-emerald-700 text-white border-emerald-500',
-        error: 'bg-rose-700 text-white border-rose-500',
-        info: 'bg-slate-800 text-white border-slate-600'
-      };
-
-      const icons = {
-        success: 'check-circle',
-        error: 'alert-circle',
-        info: 'info'
-      };
-
-      toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-xs sm:text-sm font-medium transition-all duration-300 transform translate-y-2 opacity-0 ${styles[type] || styles.info}`;
-      toast.innerHTML = `
-        <i data-lucide="${icons[type] || 'info'}" class="w-4 h-4 shrink-0"></i>
-        <span>${message}</span>
+    function downloadExcelTemplate() {
+      const today = getTodayISO();
+      const templateHtml = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="UTF-8"></head>
+        <body>
+          <table style="border-collapse:collapse;font-family:Calibri,Arial,sans-serif;">
+            <tr>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Tanggal</th>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Ruang</th>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Jam</th>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Nama Guru</th>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Mata Pelajaran</th>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Kelas & Keperluan</th>
+              <th style="background:#0b3559;color:#ffffff;border:1px solid #0b3559;padding:8px;">Status</th>
+            </tr>
+            <tr>
+              <td style="border:1px solid #cbd5e1;padding:7px;">${today}</td>
+              <td style="border:1px solid #cbd5e1;padding:7px;">Multimedia Putra</td>
+              <td style="border:1px solid #cbd5e1;padding:7px;">1, 2</td>
+              <td style="border:1px solid #cbd5e1;padding:7px;">Ust. Ahmad Fauzi, S.Pd.</td>
+              <td style="border:1px solid #cbd5e1;padding:7px;">Informatika / TIK</td>
+              <td style="border:1px solid #cbd5e1;padding:7px;">Kelas 8A - Praktik</td>
+              <td style="border:1px solid #cbd5e1;padding:7px;">Terjadwal</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #cbd5e1;padding:7px;">${today}</td>
+              <td style="border:1px solid #cbd5e1;padding:7px;">Multimedia Putri</td>
+              <td style="border:1px solid #cbd5e1;padding:7px;">3, 4</td>
+              <td style="border:1px solid #cbd5e1;padding:7px;">Ustdz. Siti Nurhaliza, S.Pd.</td>
+              <td style="border:1px solid #cbd5e1;padding:7px;">Bahasa Inggris</td>
+              <td style="border:1px solid #cbd5e1;padding:7px;">Kelas 9B - Listening</td>
+              <td style="border:1px solid #cbd5e1;padding:7px;">Terjadwal</td>
+            </tr>
+          </table>
+        </body>
+        </html>
       `;
-
-      container.appendChild(toast);
-      lucide.createIcons();
-
-      requestAnimationFrame(() => {
-        toast.classList.remove('translate-y-2', 'opacity-0');
-      });
-
-      setTimeout(() => {
-        toast.classList.add('translate-y-2', 'opacity-0');
-        setTimeout(() => toast.remove(), 300);
-      }, 3200);
+      const blob = new Blob(['\ufeff' + templateHtml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Template_Jadwal_Multimedia.xls`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast('Template Excel berhasil diunduh! Silakan isi dan impor kembali.', 'success');
     }
 
-    function refreshAllUI() {
-      renderFormJamSlots();
-      renderDailySlotOverview();
-      renderScheduleTable();
-      updateStatistics();
-      updateTeacherAutocomplete();
-    }
-
-    // Event Listeners untuk perubahan tanggal & pencarian
-    document.getElementById('bookingDate').addEventListener('change', () => {
-      renderFormJamSlots();
-      if (!document.getElementById('filterDateInput').value) {
-        renderDailySlotOverview();
+    function parseExcelDateCell(rawVal) {
+      if (rawVal === null || rawVal === undefined || rawVal === '') return '';
+      if (rawVal instanceof Date && !isNaN(rawVal.getTime())) {
+        return `${rawVal.getFullYear()}-${String(rawVal.getMonth() + 1).padStart(2, '0')}-${String(rawVal.getDate()).padStart(2, '0')}`;
       }
-    });
+      if (typeof rawVal === 'number' && window.XLSX && XLSX.SSF) {
+        const parsed = XLSX.SSF.parse_date_code(rawVal);
+        if (parsed && parsed.y && parsed.m && parsed.d) {
+          return `${parsed.y}-${String(parsed.m).padStart(2, '0')}-${String(parsed.d).padStart(2, '0')}`;
+        }
+      }
+      const str = String(rawVal).trim().replace(/^'+/, '');
+      const isoMatch = str.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+      if (isoMatch) {
+        return `${isoMatch[1]}-${isoMatch[2].padStart(2, '0')}-${isoMatch[3].padStart(2, '0')}`;
+      }
+      const slashMatch = str.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+      if (slashMatch) {
+        return `${slashMatch[3]}-${slashMatch[2].padStart(2, '0')}-${slashMatch[1].padStart(2, '0')}`;
+      }
+      // Mendukung format tanggal Indonesia seperti "Rabu, 25 November 2026"
+      const indoMatch = str.toLowerCase().match(/(\d{1,2})\s+([a-z]+)\s+(\d{4})/);
+      if (indoMatch) {
+        const monthIdx = BULAN_ID.findIndex(b => b.toLowerCase() === indoMatch[2]);
+        if (monthIdx !== -1) {
+          return `${indoMatch[3]}-${String(monthIdx + 1).padStart(2, '0')}-${indoMatch[1].padStart(2, '0')}`;
+        }
+      }
+      return '';
+    }
 
-    document.getElementById('filterDateInput').addEventListener('change', () => {
-      quickFilter = 'custom';
-      updateQuickFilterButtons();
-      renderScheduleTable();
+    function parseExcelJamCell(rawVal) {
+      const str = String(rawVal || '').trim().replace(/^'+/, '');
+      if (!str) return [];
+      const rangeMatch = str.match(/(\d+)\s*(?:s\/d|-|sampai|to)\s*(?:ke-)?(\d+)/i);
+      if (rangeMatch) {
+        const start = Number(rangeMatch[1]);
+        const end = Number(rangeMatch[2]);
+        const arr = [];
+        for (let i = Math.min(start, end); i <= Math.max(start, end); i++) {
+          if (i >= 1 && i <= 8) arr.push(i);
+        }
+        return arr;
+      }
+      const nums = str.match(/\d+/g);
+      if (!nums) return [];
+      return [...new Set(nums.map(Number).filter(n => n >= 1 && n <= 8))].sort((a, b) => a - b);
+    }
+
+    function handleExcelImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const buffer = e.target.result;
+          const uint8 = new Uint8Array(buffer);
+          let allSheetsRows = [];
+
+          // 1. Cek apakah file merupakan HTML-Table Excel (.xls hasil ekspor web)
+          const textProbe = new TextDecoder('utf-8', { fatal: false }).decode(uint8.slice(0, 2000)).toLowerCase();
+          if (textProbe.includes('<html') || textProbe.includes('<table') || textProbe.includes('<tr')) {
+            const fullText = new TextDecoder('utf-8').decode(uint8);
+            const doc = new DOMParser().parseFromString(fullText, 'text/html');
+            const tables = doc.querySelectorAll('table');
+            tables.forEach(tbl => {
+              const extractedRows = [];
+              tbl.querySelectorAll('tr').forEach(tr => {
+                const cells = Array.from(tr.querySelectorAll('th, td')).map(cell =>
+                  (cell.textContent || '').replace(/\s+/g, ' ').trim()
+                );
+                if (cells.some(c => c !== '')) extractedRows.push(cells);
+              });
+              if (extractedRows.length > 0) allSheetsRows.push(extractedRows);
+            });
+          }
+
+          // 2. Jika bukan HTML-Excel (berarti .xlsx / BIFF .xls / .csv), baca menggunakan SheetJS
+          if (allSheetsRows.length === 0) {
+            if (typeof XLSX === 'undefined') {
+              showToast('Library pembaca Excel belum siap. Periksa koneksi internet Anda.', 'error');
+              return;
+            }
+            const workbook = XLSX.read(uint8, { type: 'array', cellDates: false });
+            workbook.SheetNames.forEach(sheetName => {
+              const sheet = workbook.Sheets[sheetName];
+              const sheetRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
+              if (sheetRows.length > 0) allSheetsRows.push(sheetRows);
+            });
+          }
+
+          let headerIdx = -1;
+          let colMap = {};
+          let rows = [];
+
+          // Cari baris header di semua tabel/sheet
+          for (const sheetRows of allSheetsRows) {
+            for (let r = 0; r < Math.min(sheetRows.length, 40); r++) {
+              const normalizedRow = (sheetRows[r] || []).map(c =>
+                String(c || '').replace(/\s+/g, ' ').toLowerCase().trim()
+              );
+
+              const teacherIdx = normalizedRow.findIndex(c =>
+                c.includes('guru') || c.includes('pengajar') || c.includes('ustadz') || c === 'nama'
+              );
+              const subjectIdx = normalizedRow.findIndex(c =>
+                c.includes('mata pelajaran') || c.includes('mapel') || c.includes('pelajaran') || c.includes('materi')
+              );
+
+              if (teacherIdx !== -1 && subjectIdx !== -1 && teacherIdx !== subjectIdx) {
+                headerIdx = r;
+                rows = sheetRows;
+                colMap.teacher = teacherIdx;
+                colMap.subject = subjectIdx;
+
+                normalizedRow.forEach((cell, cIdx) => {
+                  if (cIdx === teacherIdx || cIdx === subjectIdx) return;
+                  if (cell.includes('tanggal (iso)') || cell === 'tanggal' || cell === 'tgl') colMap.date = cIdx;
+                  else if (cell.includes('hari')) colMap.hariTanggal = cIdx;
+                  else if (cell.includes('ruang') || cell.includes('lab') || cell.includes('kampus')) colMap.room = cIdx;
+                  else if (cell.includes('kode jam')) colMap.kodeJam = cIdx;
+                  else if (cell.includes('jam') || cell.includes('waktu') || cell.includes('sesi')) colMap.jam = cIdx;
+                  else if (cell.includes('kelas') || cell.includes('keterangan') || cell.includes('keperluan')) colMap.notes = cIdx;
+                  else if (cell.includes('status')) colMap.status = cIdx;
+                });
+                break;
+              }
+            }
+            if (headerIdx !== -1) break;
+          }
+
+          // Fallback: Jika tabel tidak memakai judul kolom standar, deteksi otomatis berdasarkan isi baris pertama yang memiliki tanggal
+          if (headerIdx === -1 && allSheetsRows.length > 0) {
+            const firstRows = allSheetsRows[0];
+            for (let r = 0; r < firstRows.length; r++) {
+              const row = firstRows[r] || [];
+              const dateCol = row.findIndex(cell => parseExcelDateCell(cell) !== '');
+              if (dateCol !== -1) {
+                rows = firstRows;
+                headerIdx = r - 1;
+                colMap = { date: dateCol };
+                row.forEach((cellVal, idx) => {
+                  if (idx === dateCol) return;
+                  const txt = String(cellVal || '').trim();
+                  const lower = txt.toLowerCase();
+                  if (lower.includes('putra') || lower.includes('putri')) {
+                    colMap.room = idx;
+                  } else if (colMap.jam === undefined && parseExcelJamCell(txt).length > 0 && /^[\d,\s\-s\/dke]+$/i.test(txt)) {
+                    colMap.jam = idx;
+                  } else if (colMap.teacher === undefined && txt.length > 2 && !/^\d+$/.test(txt)) {
+                    colMap.teacher = idx;
+                  } else if (colMap.subject === undefined && txt.length > 1 && !/^\d+$/.test(txt)) {
+                    colMap.subject = idx;
+                  } else if (colMap.notes === undefined && txt.length > 1) {
+                    colMap.notes = idx;
+                  }
+                });
+                break;
+              }
+            }
+          }
+
+          if (headerIdx === -1 || colMap.teacher === undefined || colMap.subject === undefined) {
+            showToast('Format tabel tidak dikenali. Gunakan tombol "Template Excel" untuk contoh format yang benar.', 'error');
+            return;
+          }
+
+          let importedCount = 0;
+          let skippedConflict = 0;
+
+          for (let r = headerIdx + 1; r < rows.length; r++) {
+            const row = rows[r];
+            if (!row || row.length === 0) continue;
+
+            // Coba baca dari kolom Tanggal (ISO), jika gagal/kosong fallback ke kolom Hari & Tanggal
+            let dateStr = colMap.date !== undefined ? parseExcelDateCell(row[colMap.date]) : '';
+            if (!dateStr && colMap.hariTanggal !== undefined) {
+              dateStr = parseExcelDateCell(row[colMap.hariTanggal]);
+            }
+
+            const teacher = colMap.teacher !== undefined ? String(row[colMap.teacher] || '').trim() : '';
+            const subject = colMap.subject !== undefined ? String(row[colMap.subject] || '').trim() : '';
+
+            if (!dateStr || !teacher || !subject) continue;
+
+            const rawRoom = colMap.room !== undefined ? String(row[colMap.room] || '').toLowerCase() : '';
+            const room = rawRoom.includes('putri') ? 'Multimedia Putri' : 'Multimedia Putra';
+
+            const jamRaw = (colMap.kodeJam !== undefined && String(row[colMap.kodeJam] || '').trim() !== '')
+              ? row[colMap.kodeJam]
+              : (colMap.jam !== undefined ? row[colMap.jam] : '');
+            const jams = parseExcelJamCell(jamRaw);
+            if (jams.length === 0) continue;
+
+            const notesVal = colMap.notes !== undefined ? String(row[colMap.notes] || '').trim() : '';
+            const notes = notesVal === '-' ? '' : notesVal;
+            const statusRaw = colMap.status !== undefined ? String(row[colMap.status] || '').trim() : '';
+            const status = statusRaw.toLowerCase() === 'selesai' ? 'Selesai' : 'Terjadwal';
+
+            const occupied = getOccupiedJamMap(dateStr, room);
+            const hasConflict = jams.some(j => occupied[j]);
+            if (hasConflict) {
+              skippedConflict++;
+              continue;
+            }
+
+            schedules.push({
+              id: 'imp-' + Date.now() + '-' + r + '-' + Math.floor(Math.random() * 1000),
+              date: dateStr,
+              room,
+              jams,
+              teacher,
+              subject,
+              notes,
+              status
+            });
+            importedCount++;
+          }
+
+          if (importedCount > 0) {
+            saveSchedules();
+            renderAll();
+            const extraMsg = skippedConflict > 0 ? ` (${skippedConflict} bentrok dilewati)` : '';
+            showToast(`Berhasil mengimpor ${importedCount} jadwal dari Excel!${extraMsg}`, 'success');
+          } else if (skippedConflict > 0) {
+            showToast(`Semua ${skippedConflict} jadwal di file bentrok dengan jadwal yang sudah ada.`, 'error');
+          } else {
+            showToast('Tidak ada baris jadwal valid. Pastikan kolom Tanggal, Jam, Guru & Mapel terisi.', 'error');
+          }
+        } catch (err) {
+          showToast('Gagal membaca file Excel. Pastikan format file benar.', 'error');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // =========================================================================
+    // 9. INISIALISASI HALAMAN & EVENT LISTENER
+    // =========================================================================
+    function renderAll() {
+      const selectedJams = Array.from(document.querySelectorAll('input[name="jamSlot"]:checked'))
+        .map(el => Number(el.value));
+      renderFormJamSlots(selectedJams);
       renderDailySlotOverview();
-    });
+      renderTable();
+      updateStatsAndSuggestions();
+    }
 
-    document.getElementById('searchInput').addEventListener('input', () => {
-      renderScheduleTable();
-    });
-
-    document.getElementById('filterRoomSelect').addEventListener('change', () => {
-      renderScheduleTable();
-    });
-
-    // Inisialisasi saat halaman selesai dimuat
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('currentYear').textContent = new Date().getFullYear();
-      document.getElementById('bookingDate').value = getTodayISO();
-      
-      loadFromStorage();
-      updateQuickFilterButtons();
-      refreshAllUI();
-      lucide.createIcons();
+      const bookingDateEl = document.getElementById('bookingDate');
+      bookingDateEl.value = getTodayISO();
+
+      bookingDateEl.addEventListener('change', () => {
+        renderFormJamSlots([]);
+        renderDailySlotOverview();
+      });
+
+      document.getElementById('searchInput').addEventListener('input', renderTable);
+      document.getElementById('filterRoomSelect').addEventListener('change', renderTable);
+      document.getElementById('filterDateInput').addEventListener('change', () => {
+        if (document.getElementById('filterDateInput').value) {
+          ['today', 'upcoming', 'all'].forEach(key => {
+            const btn = document.getElementById('btnFilter' + key.charAt(0).toUpperCase() + key.slice(1));
+            if (btn) {
+              btn.className = 'px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 transition cursor-pointer';
+            }
+          });
+        }
+        renderTable();
+      });
+
+      loadSchedules();
+      renderAll();
+      if (window.lucide) {
+        lucide.createIcons();
+      }
     });
   </script>
 </body>
