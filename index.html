@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jadwal Penggunaan Ruang Multimedia - SMP Plus Al-Ittihad Cianjur</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 130'%3E%3Cpath d='M60 12 L104 28 V68 C104 96 84 114 60 124 C36 114 16 96 16 68 V28 Z' fill='%230b3559' stroke='%23b59449' stroke-width='5'/%3E%3Crect x='34' y='44' width='52' height='36' rx='5' fill='none' stroke='%23ffffff' stroke-width='5'/%3E%3Cpath d='M50 88 H70 M60 80 V88' stroke='%23b59449' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='60' cy='24' r='5' fill='%23b59449'/%3E%3C/svg%3E" />
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -105,10 +106,28 @@
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
   <!-- Kop Khusus Saat Dicetak (Print Only) -->
-  <div class="print-only hidden border-b-2 border-slate-800 pb-4 mb-6 text-center">
-    <h1 class="text-xl font-bold uppercase tracking-wide">JADWAL PENGGUNAAN RUANG MULTIMEDIA</h1>
-    <h2 class="text-lg font-semibold">SMP PLUS AL-ITTIHAD CIANJUR</h2>
-    <p id="printSubtitle" class="text-sm text-slate-600 mt-1">Dicetak pada: -</p>
+  <div class="print-only hidden border-b-2 border-slate-800 pb-4 mb-6">
+    <div class="flex items-center justify-center gap-4">
+      <svg class="w-16 h-16 shrink-0" viewBox="0 0 140 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M70 18 L118 35 V78 C118 110 96 132 70 144 C44 132 22 110 22 78 V35 Z" fill="#0b3559"/>
+        <path d="M70 25 L111 40 V78 C111 106 92 125 70 136 C48 125 29 106 29 78 V40 Z" stroke="#b59449" stroke-width="3.5" fill="none"/>
+        <path d="M70 14 V58" stroke="#b59449" stroke-width="4.5" stroke-linecap="round"/>
+        <circle cx="70" cy="11" r="5" fill="#ffffff" stroke="#b59449" stroke-width="3.5"/>
+        <rect x="40" y="48" width="60" height="42" rx="6" fill="#0b3559" stroke="#ffffff" stroke-width="4.5"/>
+        <circle cx="70" cy="83" r="2.2" fill="#ffffff"/>
+        <path d="M56 98 H84 L79 90 H61 Z" fill="#0b3559"/>
+        <path d="M52 100 H88" stroke="#0b3559" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="62" cy="69" r="5" fill="#ffffff" stroke="#b59449" stroke-width="3.5"/>
+        <path d="M66 66 L83 51 H95" stroke="#b59449" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M72 72 L106 105" stroke="#0b3559" stroke-width="5" stroke-linecap="round"/>
+        <text x="70" y="116" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="11" fill="#ffffff">SMP</text>
+      </svg>
+      <div class="text-left">
+        <h1 class="text-xl font-bold uppercase tracking-wide">JADWAL PENGGUNAAN RUANG MULTIMEDIA</h1>
+        <h2 class="text-lg font-semibold">SMP PLUS AL-ITTIHAD CIANJUR</h2>
+        <p id="printSubtitle" class="text-sm text-slate-600 mt-0.5">Dicetak pada: -</p>
+      </div>
+    </div>
   </div>
 
   <!-- Header Modern -->
@@ -116,13 +135,61 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div class="flex items-start sm:items-center gap-4">
-          <div class="p-3 bg-white/15 backdrop-blur-sm rounded-2xl border border-white/20 shadow-inner shrink-0">
-            <i data-lucide="monitor-play" class="w-8 h-8 text-emerald-300"></i>
+          <!-- Logo Lab Komputer SMP Plus Al-Ittihad Cianjur -->
+          <div class="p-2 bg-white rounded-2xl border-2 border-amber-300/70 shadow-md shrink-0 flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 relative overflow-hidden">
+            <img 
+              src="logo.png" 
+              alt="Logo Lab Komputer SMP Plus Al Ittihad Cianjur" 
+              class="w-full h-full object-contain"
+              onerror="this.style.display='none'; document.getElementById('fallbackSchoolLogo').classList.remove('hidden');"
+            />
+            <svg id="fallbackSchoolLogo" class="hidden w-full h-full" viewBox="0 0 140 165" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Logo Lab Komputer SMP Plus Al Ittihad Cianjur">
+              <!-- Perisai Utama -->
+              <path d="M70 20 L118 37 V80 C118 112 96 134 70 146 C44 134 22 112 22 80 V37 Z" fill="#0b3559"/>
+              <path d="M70 27 L111 42 V80 C111 108 92 127 70 138 C48 127 29 108 29 80 V42 Z" stroke="#b59449" stroke-width="3.5" fill="none"/>
+              
+              <!-- Roda Gigi Emas Kanan -->
+              <g fill="#b59449">
+                <circle cx="101" cy="70" r="13"/>
+                <rect x="98.5" y="52" width="5" height="36" rx="1"/>
+                <rect x="83" y="67.5" width="36" height="5" rx="1"/>
+                <rect x="88" y="57" width="26" height="5" rx="1" transform="rotate(45 101 70)"/>
+                <rect x="88" y="57" width="26" height="5" rx="1" transform="rotate(-45 101 70)"/>
+                <circle cx="101" cy="70" r="6.5" fill="#0b3559"/>
+              </g>
+
+              <!-- Node Sirkuit Atas -->
+              <path d="M70 14 V60" stroke="#b59449" stroke-width="4.5" stroke-linecap="round"/>
+              <circle cx="70" cy="11" r="5.5" fill="#ffffff" stroke="#b59449" stroke-width="3.5"/>
+              <path d="M53 26 L58 36" stroke="#0b3559" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="51" cy="23" r="4.5" fill="#ffffff" stroke="#0b3559" stroke-width="3"/>
+              <path d="M87 26 L82 36" stroke="#0b3559" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="89" cy="23" r="4.5" fill="#ffffff" stroke="#0b3559" stroke-width="3"/>
+
+              <!-- Monitor Komputer -->
+              <rect x="40" y="50" width="60" height="42" rx="6" fill="#0b3559" stroke="#ffffff" stroke-width="4.5"/>
+              <circle cx="70" cy="85" r="2.2" fill="#ffffff"/>
+              <path d="M56 100 H84 L79 92 H61 Z" fill="#ffffff"/>
+              <path d="M51 102 H89" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+
+              <!-- Sirkuit Dalam Layar -->
+              <path d="M42 71 H53" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+              <path d="M73 61 A13 13 0 1 0 77 79" stroke="#ffffff" stroke-width="4" stroke-linecap="round" fill="none"/>
+              <circle cx="74" cy="60" r="3" fill="#ffffff"/>
+              <circle cx="63" cy="71" r="5" fill="#0b3559" stroke="#b59449" stroke-width="3.5"/>
+              <path d="M67 68 L84 53 H96" stroke="#b59449" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M73 74 L108 108" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
+
+              <!-- Teks SMP & Padi Emas Bawah -->
+              <text x="70" y="118" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="11" fill="#ffffff" letter-spacing="0.5">SMP</text>
+              <path d="M47 109 C48 119 56 125 66 127" stroke="#b59449" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+              <path d="M93 109 C92 119 84 125 74 127" stroke="#b59449" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            </svg>
           </div>
           <div>
             <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 mb-1.5">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              Sistem Reservasi & Monitoring Ruang
+              Lab Komputer & Ruang Multimedia
             </div>
             <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
               Jadwal Penggunaan Ruang Multimedia
